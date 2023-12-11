@@ -1,0 +1,161 @@
+  <!-- blocos.html -->
+  <!DOCTYPE html>
+  <html lang="en" xmlns:th="http://www.thymeleaf.org">
+  <head>
+    <meta charset="UTF-8">
+    <title>Página de Bloco$</title>
+    <!-- Vincule o arquivo CSS -->
+    <link rel="stylesheet" href="https://www.w3schools.com/w3css/4/w3.css">
+    <!-- Adicione os scripts do SockJS e do Stomp -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/sockjs-client/1.5.0/sockjs.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/stomp.js/2.3.3/stomp.min.js"></script>
+    <script src="https://code.jquery.com/jquery-3.6.4.min.js"></script>
+    <!-- Adicione estas linhas -->
+    <link rel="stylesheet" type="text/css" href="https://cdn.datatables.net/1.13.7/css/jquery.dataTables.min.css">
+    <script type="text/javascript" charset="utf8" src="https://cdn.datatables.net/1.13.7/js/jquery.dataTables.min.js"></script>
+      <style>
+                    table {
+                        border-collapse: collapse;
+                        width: 100%;
+                    }
+
+                    th, td {
+                        border: 1px solid black;
+                        padding: 8px;
+                        text-align: left;
+                    }
+                </style>
+  </head>
+  <body >
+  <!-- Barra de Navegação -->
+  <div class="w3-sidebar w3-bar-block" style="width:25%" w3-green>
+    <div class="w3-container ">
+      <header class="w3-green">
+        <h1 class="w3-wide w3-tag w3-jumbo w3-green ">Pilacoin</h1>
+      </header>
+    </div>
+    <div class="w3-container">
+      <a href="/" class="w3-bar-item w3-hover-green w3-hover-shadow">Home</a>
+      <a href="/pilacoins" class="w3-bar-item w3-hover-green w3-hover-shadow">Pila$ minerados</a>
+      <a href="/blocos" class="w3-bar-item w3-hover-green w3-hover-shadow">Bloco$ minerados</a>
+      <a href="/validados" class="w3-bar-item w3-hover-green w3-hover-shadow">Pila$ validados</a>
+      <a href="/blocosValidados" class="w3-bar-item w3-hover-green w3-hover-shadow">Bloco$ validados</a>
+      <a href="#" class="w3-bar-item w3-hover-green">Pilas do servidor</a>
+    </div>
+    <div class="w3-container w3-pale-green w3-border-top w3-border-bottom w3-center">
+      <!-- Adicione esses botões ao seu HTML -->
+      <p></p>
+
+      <p class="w3-left-align" >Controle :</p>
+      <p></p>
+      <button class="w3-button w3-block w3-border w3-hover-green w3-hover-shadow" onclick="startMining()">Parar Mineração</button>
+      <p></p>
+      <button class="w3-button w3-block w3-border w3-hover-green w3-hover-shadow" onclick="restartMining()">Reiniciar Mineração</button>
+      <p></p>
+    </div>
+    <div>
+        <span class="w3-tag w3-xlarge w3-padding w3-red w3-hover-shadow" style="transform:rotate(-20deg)">
+            $ $ $
+        </span>
+    </div>
+  </div>
+  <div style="margin-left:25%">
+
+  <h1>Bloco$ Minerados</h1>
+    <div class="w3-container">
+      <div class="w3-panel w3-pale-green w3-border-top w3-border-bottom w3-hover-shadow">
+        <!-- Div de Mensagem -->
+        <div  id="cliente" class="w3-monospace">[cliente ]: Minerando $$$ </div>
+        <div  id="servidor" class="w3-monospace">[servidor]: BemVindo ! </div>
+      </div>
+    </div>
+  <table id="blocosTable" class="w3-table-all w3-card-4 w3-hoverable">
+    <thead>
+    <tr class="w3-green">
+      <th>Count</th>
+      <!--<th>ID</th>-->
+      <th>Número do Bloco</th>
+      <th>Nonce</th>
+      <!-- Adicione mais colunas conforme necessário -->
+    </tr>
+    </thead>
+    <tbody>
+    <!-- Dados da tabela serão preenchidos aqui via AJAX -->
+    </tbody>
+  </table>
+    <div class="w3-container w3-green">
+      <h5>Colégio Politécnico - UFSM</h5>
+      <p>Tópicos Avançados - Sistemas para Internet</p>
+      <p>&copy; 2023 Pilacoin. Todos os direitos reservados.</p>
+    </div>
+  </div>
+  <script>
+    var socket = new SockJS('/ws');
+    var stompClient = Stomp.over(socket);
+
+    stompClient.connect({}, function(frame) {
+        stompClient.subscribe('/topic/feedback', function(response) {
+            try {
+                var feedback = JSON.parse(response.body);
+
+                if (feedback && feedback.msg) {
+                    var mensagem = feedback.msg;
+                    document.getElementById('servidor').innerHTML = "[servidor]: " + mensagem;
+                } else {
+                    document.getElementById('servidor').innerHTML = "[Erro ] : Propriedade 'mensagem' não encontrada no objeto recebido.";
+                }
+            } catch (error) {
+                document.getElementById('servidor').innerHTML = "[Erro ] : ao processar a resposta: " + error.message;
+            }
+        });
+
+        // Subscreve no novo tópico de feedback do cliente
+        stompClient.subscribe('/topic/feedback-cliente', function(response) {
+            try {
+                var feedback = JSON.parse(response.body);
+
+                if (feedback && feedback.msg) {
+                    var mensagem = feedback.msg;
+                    document.getElementById('cliente').innerHTML = "[cliente ]: " + mensagem;
+                } else {
+                    document.getElementById('cliente').innerHTML = "[Erro ] : Propriedade 'mensagem' não encontrada no objeto recebido.";
+                }
+            } catch (error) {
+                document.getElementById('cliente').innerHTML = "[Erro ] : ao processar a resposta: " + error.message;
+            }
+        });
+    });
+</script>
+  <script>
+          $(document).ready(function() {
+              // Fazer requisição AJAX quando a página carrega
+              $.ajax({
+                  url: "/blocos/getMeusBlocos", // Endpoint para obter todos os Blocos
+                  type: "GET",
+                  success: function(data) {
+                      // Limpar a tabela
+                      $("#blocosTable tbody").empty();
+
+                      // Adiciona uma coluna para contar as linhas
+                      let count = 0;
+
+                      // Preencher a tabela com os dados recebidos
+                      $.each(data, function(index, item) {
+                      count++;
+                          var row = "<tr>" +
+                              '<td>' + count + '</td>' +
+                              //"<td>" + item.id + "</td>" +
+                              "<td>" + item.numeroBloco + "</td>" +
+                              "<td>" + item.nonce + "</td>" +
+                              "</tr>";
+                          $("#blocosTable tbody").append(row);
+                      });
+                  },
+                  error: function(error) {
+                      console.log("Erro na requisição AJAX: " + error);
+                  }
+              });
+          });
+      </script>
+  </body>
+  </html>

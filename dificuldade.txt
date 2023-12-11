@@ -1,0 +1,1 @@
+{"dificuldade":"fffffffffffffffffffffffffffffffffffffffffffffffffffffffffff","inicio":1700528555603,"validadeFinal":1700614955603}

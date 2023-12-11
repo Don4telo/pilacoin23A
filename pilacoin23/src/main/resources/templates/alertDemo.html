@@ -1,0 +1,39 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>WebSocket Alert Demo</title>
+  <!-- Adicione os scripts do SockJS e do Stomp -->
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/sockjs-client/1.5.0/sockjs.min.js"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/stomp.js/2.3.3/stomp.min.js"></script>
+
+  <script>
+        // Conecta-se ao servidor WebSocket
+        var socket = new SockJS('/ws');
+        var stompClient = Stomp.over(socket);
+        stompClient.connect({}, function(frame) {
+            console.log('Conectado: ' + frame);
+        });
+
+        // Função para enviar mensagem de alerta ao servidor
+        function sendAlert() {
+            var payload = "Esta é uma mensagem de alerta!";
+            stompClient.send('/alert/show', {}, payload);
+        }
+
+        // Função para se inscrever em alertas do servidor
+        function subscribeToAlerts() {
+            stompClient.subscribe('/topic/alerts', function(response) {
+                var alertMessage = JSON.parse(response.body).content;
+                alert(alertMessage);
+            });
+        }
+    </script>
+</head>
+<body>
+<h1>WebSocket Alert Demo</h1>
+<button onclick="sendAlert()">Enviar Alerta</button>
+<button onclick="subscribeToAlerts()">Inscrever-se em Alertas</button>
+</body>
+</html>

@@ -1,0 +1,152 @@
+<!-- index.html -->
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>Página Inicial</title>
+  <!-- Vincule o arquivo CSS -->
+  <link rel="stylesheet" href="https://www.w3schools.com/w3css/4/w3.css">
+  <!-- Adicione os scripts do SockJS e do Stomp -->
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/sockjs-client/1.5.0/sockjs.min.js"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/stomp.js/2.3.3/stomp.min.js"></script>
+
+    <script>
+    var socket = new SockJS('/ws');
+    var stompClient = Stomp.over(socket);
+
+    // Adicione as funções stopMining e restartMining
+        function stopMining() {
+            // Envia mensagem WebSocket para parar a mineração
+            var msg = "parou";
+            stompClient.send('/topic/api/mineracao/parar', {}, JSON.stringify({msg}));
+
+        }
+
+        function restartMining() {
+            // Envia mensagem WebSocket para reiniciar a mineração
+            var msg = "comecou";
+            stompClient.send('/topic/api/mineracao/reiniciar', {}, JSON.stringify({msg}));
+
+        }
+
+    stompClient.connect({}, function(frame) {
+        stompClient.subscribe('/topic/feedback', function(response) {
+            try {
+                var feedback = JSON.parse(response.body);
+
+                if (feedback && feedback.msg) {
+                    var mensagem = feedback.msg;
+                    document.getElementById('servidor').innerHTML = "[servidor]: " + mensagem;
+                } else {
+                    document.getElementById('servidor').innerHTML = "[Erro ] : Propriedade 'mensagem' não encontrada no objeto recebido.";
+                }
+            } catch (error) {
+                document.getElementById('servidor').innerHTML = "[Erro ] : ao processar a resposta: " + error.message;
+            }
+        });
+
+        // Subscreve no novo tópico de feedback do cliente
+        stompClient.subscribe('/topic/feedback-cliente', function(response) {
+            try {
+                var feedback = JSON.parse(response.body);
+
+                if (feedback && feedback.msg) {
+                    var mensagem = feedback.msg;
+                    document.getElementById('cliente').innerHTML = "[cliente ]: " + mensagem;
+                } else {
+                    document.getElementById('cliente').innerHTML = "[Erro ] : Propriedade 'mensagem' não encontrada no objeto recebido.";
+                }
+            } catch (error) {
+                document.getElementById('cliente').innerHTML = "[Erro ] : ao processar a resposta: " + error.message;
+            }
+        });
+    });
+</script>
+
+</head>
+<body>
+<!-- Barra de Navegação -->
+<div class="w3-sidebar w3-bar-block" style="width:25%" w3-green>
+    <div class="w3-container ">
+        <header class="w3-green">
+            <h1 class="w3-wide w3-tag w3-jumbo w3-green ">Pilacoin</h1>
+        </header>
+    </div>
+    <div class="w3-container">
+        <a href="/" class="w3-bar-item w3-hover-green w3-hover-shadow">Home</a>
+        <a href="/pilacoins" class="w3-bar-item w3-hover-green w3-hover-shadow">Pila$ minerados</a>
+        <a href="/blocos" class="w3-bar-item w3-hover-green w3-hover-shadow">Bloco$ minerados</a>
+        <a href="/validados" class="w3-bar-item w3-hover-green w3-hover-shadow">Pila$ validados</a>
+        <a href="/blocosValidados" class="w3-bar-item w3-hover-green w3-hover-shadow">Bloco$ validados</a>
+        <a href="#" class="w3-bar-item w3-hover-green">Pilas do servidor</a>
+    </div>
+    <div class="w3-container w3-pale-green w3-border-top w3-border-bottom w3-center">
+        <!-- Adicione esses botões ao seu HTML -->
+        <p></p>
+        <p class="w3-left-align" >Controle :</p>
+        <p></p>
+        <button class="w3-button w3-block w3-border w3-hover-green w3-hover-shadow" onclick="stopMining()">Parar Mineração</button>
+        <p></p>
+        <button class="w3-button w3-block w3-border w3-hover-green w3-hover-shadow" onclick="restartMining()">Reiniciar Mineração</button>
+        <p></p>
+    </div>
+    <div>
+        <span class="w3-tag w3-xlarge w3-padding w3-red w3-hover-shadow" style="transform:rotate(-20deg)">
+            $ $ $
+        </span>
+    </div>
+</div>
+<div style="margin-left:25%" class="w3-container">
+    <!-- Cabeçalho -->
+    <header>
+        <h1> Desenvolvida com Spring Boot e RabbitMQ</h1>
+    </header>
+    <div class="w3-container">
+        <div class="w3-panel w3-pale-green w3-border-top w3-border-bottom w3-hover-shadow">
+        <!-- Div de Mensagem -->
+        <div  id="cliente" class="w3-monospace">[cliente ]: Minerando $$$ </div>
+        <div  id="servidor" class="w3-monospace">[servidor]: BemVindo ! </div>
+    </div>
+    </div>
+    <div class="w3-container">
+        <p>O Pilacoin é uma criptomoeda inovadora, criada como parte de um projeto acadêmico e implementada usando tecnologias avançadas. Desenvolvido em Java, nosso sistema utiliza o poderoso framework Spring Boot para agilizar o desenvolvimento e o RabbitMQ para comunicação eficiente entre os componentes.</p>
+        <section>
+            <h2>Características Principais:</h2>
+            <ul>
+                <li>
+                    <h3>Mineração Descentralizada:</h3>
+                    <p>Nosso serviço de mineração, implementado em Java com o Spring Boot, permite a mineração descentralizada de Pilacoins. Cada nó na rede contribui para a criação de novas unidades da criptomoeda.</p>
+                </li>
+                <li>
+                    <h3>Lógica de Mineração Avançada:</h3>
+                    <p>O algoritmo de mineração implementado é baseado em uma lógica avançada que leva em consideração a dificuldade das operações. Isso garante a segurança e a integridade da rede Pilacoin.</p>
+                </li>
+                <li>
+                    <h3>Integração com RabbitMQ:</h3>
+                    <p>Utilizamos o RabbitMQ, um sistema de mensageria, para facilitar a comunicação assíncrona entre os diferentes componentes do sistema. Isso proporciona escalabilidade e eficiência na transmissão de mensagens.</p>
+                </li>
+                <li>
+                    <h3>Persistência de Dados com JPA:</h3>
+                    <p>A persistência de dados é tratada por meio do Java Persistence API (JPA), garantindo que as informações sobre as Pilacoins sejam armazenadas de forma segura e eficiente em um banco de dados relacional.</p>
+                </li>
+            </ul>
+        </section>
+
+    </div>
+    <div class="w3-container">
+
+        <button id="pararButton" >Parar Mineração</button>
+        <button id="reiniciarButton">Reiniciar Mineração</button>
+
+    </div>
+
+    <div class="w3-container w3-green">
+        <h5>Colégio Politécnico - UFSM</h5>
+        <p>Tópicos Avançados - Sistemas para Internet</p>
+        <p>&copy; 2023 Pilacoin. Todos os direitos reservados.</p>
+    </div>
+  </div>
+
+</nav>
+</body>
+</html>
